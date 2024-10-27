@@ -1,5 +1,6 @@
 
 use std::{
+    fs,
     io::{prelude::*, BufReader},
     net::{TcpListener, TcpStream},
 };
@@ -7,9 +8,8 @@ use std::{
 
 
 fn main(){
-    let addr:String=String::from("127.0.0.1:7878");
     //returns a new TCPListener Instance
-    let listener=TcpListener::bind(addr).unwrap();
+    let listener=TcpListener::bind("127.0.0.1:7878").unwrap();
     println!("Listener obj{:?}", listener);
 
     //represents an open conn between client server
@@ -25,9 +25,18 @@ fn handle_connection(mut stream:TcpStream){
     let buf_reader=BufReader::new(&mut stream);
     let https_request:Vec<_>=buf_reader
     .lines()
-    .map(|result|result.unwrap()).
-    take_while(|line|!line.is_empty())
+    .map(|result|result.unwrap())
+    .take_while(|line|!line.is_empty())
     .collect();
-    let response= "HTTP/1.1 200 OK\r\n\r\n";
+
+    let status_line="HTTP/1.1 200 OK";
+    let contents= fs::read("homepage.html").unwrap();
+    let length=contents.len();
+
+
+
+    let response= format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}");
     stream.write(response.as_bytes()).unwrap();
+
+
 }

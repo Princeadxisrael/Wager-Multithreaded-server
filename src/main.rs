@@ -30,7 +30,7 @@ fn handle_connection(mut stream:TcpStream){
     .collect();
 
     let status_line="HTTP/1.1 200 OK";
-    let contents= fs::read("homepage.html").unwrap();
+    let contents= fs::read_to_string("homepage.html").unwrap();
     let length=contents.len();
 
 

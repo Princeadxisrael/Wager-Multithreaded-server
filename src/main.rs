@@ -1,3 +1,4 @@
+use Multi_thread_server_wager::ThreadPool;
 
 use std::{
     fs,
@@ -12,12 +13,13 @@ use std::{
 fn main(){
     //returns a new TCPListener Instance
     let listener=TcpListener::bind("127.0.0.1:7878").unwrap();
-    println!("Listener obj{:?}", listener);
+    let pool=ThreadPool::new(4);
 
     //represents an open conn between client server
+    //spawns a new thread for each stream
     for stream in listener.incoming(){
             let stream=stream.unwrap();
-            thread::spawn(||{
+            pool.execute(||{
                 handle_connection(stream);
             });
             

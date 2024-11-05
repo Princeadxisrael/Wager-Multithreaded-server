@@ -49,7 +49,9 @@ impl Worker{
     //fn new takes an id and returns a worker instance that holds the id and a thread spawned with empty closure
     fn new(id:usize, reciever: Arc<Mutex<mpsc::Receiver<Job>>> )->Worker{
         let thread=thread::spawn(||{
-            reciever;
+            let job=reciever.lock().recv.unwrap();
+            println!("Worker {id} got a job: process ongiong");
+            job()
         });
         Worker{id, thread}
     }

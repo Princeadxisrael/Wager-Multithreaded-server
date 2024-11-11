@@ -3,7 +3,7 @@ use std::{
 
 pub struct ThreadPool{
     workers: Vec<Worker>,
-    sender: mpsc::Sender<Job>
+    sender: Option<mpsc::Sender<Job>>,
 }
 
 
@@ -29,14 +29,14 @@ impl ThreadPool{
          workers.push(Worker::new(id, Arc::clone(&reciever)));
         }
 
-        ThreadPool{workers, sender}
+        ThreadPool{workers, sender:Some(sender)}
     }
     //send transfer the closure from one thread to another and 'static
     //because we don't know how long it will take for the thread to execute
     pub fn execute<F>(&self, f:F) where F:FnOnce() + Send + 'static,
     {
         let job=Box::new(f);
-        self.sender.send(job).unwrap();
+        self.sender.as_ref().unwrap().send(job).unwrap();
     }
 }
 
@@ -59,6 +59,7 @@ impl Worker{
 
 impl Drop for ThreadPool{
 fn drop(&mut self) {
+    drop(self.sender.take());
     for worker in &mut self.workers{
         println!("Shutting down worker {}", worker.id);
 

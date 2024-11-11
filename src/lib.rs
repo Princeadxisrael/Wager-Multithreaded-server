@@ -42,7 +42,7 @@ impl ThreadPool{
 
 struct Worker {
     id:usize,
-    thread: thread::JoinHandle<()>
+    thread: Option<thread::JoinHandle<()>>
 }
 
 impl Worker{
@@ -53,7 +53,7 @@ impl Worker{
             println!("Worker {id} got a job: process ongiong");
             job()
         });
-        Worker{id, thread}
+        Worker{id, thread: Some(thread)}
     }
 }
 
@@ -62,7 +62,9 @@ fn drop(&mut self) {
     for worker in &mut self.workers{
         println!("Shutting down worker {}", worker.id);
 
-        worker.thread.join().unwrap();
+        if let   Some(thread)=  worker.thread.take(){
+            thread.join().unwrap()
+        }
     }
 }
 
